@@ -1,0 +1,15 @@
+{
+  "name": "file-upload-lab",
+  "version": "1.0.0",
+  "description": "Educational project demonstrating vulnerable and fixed file upload handling",
+  "main": "server-vulnerable.js",
+  "type": "commonjs",
+  "scripts": {
+    "vulnerable": "node server-vulnerable.js",
+    "fixed": "node server-fixed.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
