@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">File upload lab request flow</title>
+  <desc id="desc">A browser sends a multipart upload to either the vulnerable or fixed Express server, which writes to the uploads directory.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity=".22"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#94a3b8"/></marker>
+  </defs>
+  <rect width="1200" height="520" rx="24" fill="url(#bg)"/>
+  <text x="60" y="68" fill="#f8fafc" font-family="Arial, sans-serif" font-size="28" font-weight="700">File Upload Lab · Request Flow</text>
+  <text x="60" y="101" fill="#94a3b8" font-family="Arial, sans-serif" font-size="17">The same browser workflow exercises two different storage models.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="65" y="190" width="220" height="150" rx="16" fill="#0f172a" stroke="#60a5fa" stroke-width="2"/>
+    <rect x="330" y="190" width="220" height="150" rx="16" fill="#0f172a" stroke="#a78bfa" stroke-width="2"/>
+    <rect x="595" y="125" width="240" height="110" rx="16" fill="#3f1d1d" stroke="#f87171" stroke-width="2"/>
+    <rect x="595" y="285" width="240" height="110" rx="16" fill="#073b32" stroke="#34d399" stroke-width="2"/>
+    <rect x="900" y="190" width="235" height="150" rx="16" fill="#0f172a" stroke="#fbbf24" stroke-width="2"/>
+  </g>
+
+  <g fill="#f8fafc" font-family="Arial, sans-serif" text-anchor="middle">
+    <text x="175" y="238" font-size="21" font-weight="700">Browser UI</text><text x="175" y="270" fill="#cbd5e1" font-size="16">public/index.html</text><text x="175" y="297" fill="#94a3b8" font-size="15">Select and upload a file</text>
+    <text x="440" y="238" font-size="21" font-weight="700">Express API</text><text x="440" y="270" fill="#cbd5e1" font-size="16">POST /upload</text><text x="440" y="297" fill="#94a3b8" font-size="15">Multer memory storage</text>
+    <text x="715" y="170" font-size="20" font-weight="700">Vulnerable model</text><text x="715" y="201" fill="#fecaca" font-size="15">Trusts name and bytes</text>
+    <text x="715" y="330" font-size="20" font-weight="700">Fixed model</text><text x="715" y="361" fill="#bbf7d0" font-size="15">Validates before writing</text>
+    <text x="1017" y="238" font-size="21" font-weight="700">uploads/</text><text x="1017" y="270" fill="#cbd5e1" font-size="16">Server-side storage</text><text x="1017" y="297" fill="#94a3b8" font-size="15">Compare the result</text>
+  </g>
+
+  <path d="M285 265 H330" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M550 245 C570 220 575 195 595 180" fill="none" stroke="#f87171" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M550 285 C570 310 575 335 595 340" fill="none" stroke="#34d399" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M835 180 C870 205 870 225 900 245" fill="none" stroke="#f87171" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M835 340 C870 315 870 295 900 275" fill="none" stroke="#34d399" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="600" y="472" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="16">Run one server at a time to compare behavior on ports 3002 and 3003.</text>
+</svg>

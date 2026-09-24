@@ -1,162 +1,120 @@
-# File Upload Vulnerability Lab
+# File Upload Security Lab
 
-This lab demonstrates the difference between a vulnerable file upload implementation and a hardened one. The project is intentionally split into two servers so you can compare dangerous behavior against secure handling in a controlled environment.
+![File upload request flow](docs/images/upload-flow.svg)
 
-## Project Layout
+An intentionally vulnerable Node.js and Express lab for comparing unsafe file upload handling with a hardened implementation. Run the same browser workflow against both servers and observe how filename trust, content validation, and storage strategy change the result.
 
-- `server-vulnerable.js` — accepts uploaded files without validation
-- `server-fixed.js` — blocks unsafe files and validates both extension and content
-- `public/index.html` — browser-based upload form for testing both servers
-- `uploads/` — storage area for uploaded files
+> **Safety:** This project is for local, isolated security education. Do not expose the vulnerable server to a network or use it with real files or data.
 
-## Start the Lab
+## What You Will Learn
 
-Install dependencies:
+- Why trusting an uploaded filename can create path and code-execution risk.
+- Why extension checks and client-provided MIME types are not enough on their own.
+- How magic-byte checks, size limits, and randomized storage names add defense in depth.
+- How to compare a vulnerable implementation with a safer baseline in a controlled lab.
+
+![Layered upload defenses](docs/images/defense-layers.svg)
+
+## Quick Start
+
+Requirements: Node.js 18 or newer and npm.
 
 ```bash
 npm install
 ```
 
-Run the vulnerable app:
+Start the intentionally vulnerable server on port `3002`:
 
 ```bash
 npm run vulnerable
 ```
 
-Run the fixed app:
+Start the fixed server on port `3003` in a separate terminal:
 
 ```bash
 npm run fixed
 ```
 
-Open the browser at:
+Open either URL in a browser:
 
-- http://localhost:3002
-- http://localhost:3003
+- Vulnerable mode: <http://localhost:3002>
+- Fixed mode: <http://localhost:3003>
 
-## Vulnerable Behavior
+Stop each server with `Ctrl+C`. The two processes share the local `uploads/` directory, so clear test artifacts between experiments when needed.
 
-The vulnerable server accepts the file name and saves it to disk without checking whether it is a valid image or a malicious script.
+## Compare the Two Modes
 
-Example exploit payloads:
+| Behavior | Vulnerable mode | Fixed mode |
+| --- | --- | --- |
+| File size | Multer limit: 8 MB | 2 MB application limit |
+| Extension | Accepted as supplied | `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp` only |
+| MIME type | Not validated | Compared with the allowlist |
+| File content | Not inspected | Magic bytes checked against the extension |
+| Stored name | Original filename | Timestamp plus UUID and safe extension |
+| Main lesson | User input reaches disk directly | Multiple checks happen before storage |
 
-- `shell.php`
-- `webshell.jsp`
-- `avatar.php.jpg`
-- `malicious.svg`
+The browser UI includes sample filenames for demonstrating why a name such as `shell.php` or `payload.jsp` should never be treated as harmless input. Use only inert lab files while testing.
 
-If the web server is configured to execute uploaded files, the attacker may be able to run server-side code or trigger a script execution flow.
+## API Surface
 
-## Fixed Behavior
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/mode` | Returns `vulnerable` or `fixed` |
+| `POST` | `/upload` | Accepts a multipart field named `uploadFile` |
+| `GET` | `/files` | Lists files currently in `uploads/` |
 
-The hardened server:
+Example request:
 
-- restricts uploads to a safe file extension allowlist
-- validates the MIME type
-- checks the file magic number against the expected format
-- rejects oversized files
-- stores files with random names instead of the original filename
-- prevents path traversal and direct overwrite issues
-
-## Diff Summary
-
-```diff
-- const target = path.join(uploadDir, file.originalname);
-- fs.renameSync(file.path, target);
-+ const ext = path.extname(file.originalname).toLowerCase();
-+ if (!allowedExtensions.has(ext)) {
-+   throw new Error('Only image files are allowed');
-+ }
-+
-+ if (!allowedMime.has(file.mimetype)) {
-+   throw new Error('Invalid content type');
-+ }
-+
-+ if (!matchesMagicNumber(file.buffer, ext)) {
-+   throw new Error('File content does not match its extension');
-+ }
-+
-+ const safeName = `${Date.now()}-${crypto.randomUUID()}${ext}`;
-+ fs.writeFileSync(path.join(uploadDir, safeName), file.buffer);
+```bash
+curl -F "uploadFile=@sample.png" http://localhost:3003/upload
 ```
 
-This is the core difference: the vulnerable version trusts user input, while the fixed version validates both the filename and the actual file content before writing to disk.
+Successful responses include the active mode, original filename, and server-side storage name. Rejected files return an HTTP `400` response with the validation reason.
 
-## Preventing File Upload Vulnerabilities
+## Project Structure
 
-### 1. Extension Validation
-
-Do not rely only on the extension. Extensions are easy to spoof and can be used to bypass naive checks. Always apply a strict allowlist and reject dangerous extensions.
-
-```php
-$fileName = basename($_FILES["uploadFile"]["name"]);
-
-if (preg_match('/^.*\.(php|phtml|phps|php5|jsp|jspx|asp|aspx)$/i', $fileName)) {
-    echo "Only images are allowed";
-    die();
-}
-
-if (!preg_match('/^.*\.(jpg|jpeg|png|gif|webp)$/i', $fileName)) {
-    echo "Only images are allowed";
-    die();
-}
+```text
+.
+├── app.js                         # Shared Express application factory
+├── server-vulnerable.js           # Lab server on port 3002
+├── server-fixed.js                # Hardened server on port 3003
+├── controllers/
+│   ├── mode-controller.js         # Reports the active mode
+│   └── upload-controller.js       # HTTP upload and listing behavior
+├── models/
+│   ├── vulnerable-upload.js       # Writes the original filename
+│   └── fixed-upload.js            # Validates and randomizes storage
+├── routes/upload-routes.js        # `/mode`, `/upload`, and `/files`
+├── public/index.html              # Browser test interface
+├── uploads/                       # Local lab output directory
+└── docs/images/                   # README diagrams
 ```
 
-### 2. Content Validation
+## Where the Vulnerability Lives
 
-Check the file signature and MIME type. A file with a `.png` extension should begin with a valid PNG header and report a `image/png` MIME type. Never trust the client-provided content type alone.
+The vulnerable model builds a destination path from `file.originalname` and writes the uploaded bytes without checking the file type. That creates a dangerous trust boundary: a user-controlled name and content reach server-side storage unchanged.
 
-```php
-$fileName = basename($_FILES["uploadFile"]["name"]);
-$contentType = $_FILES['uploadFile']['type'];
-$mimeType = mime_content_type($_FILES['uploadFile']['tmp_name']);
+The fixed model applies checks before writing:
 
-if (!preg_match('/^.*\.png$/i', $fileName)) {
-    die("Only PNG images are allowed");
-}
+1. Require a file buffer and enforce a 2 MB limit.
+2. Allow only known image extensions and MIME types.
+3. Compare file signatures with the expected format.
+4. Generate a random storage name instead of reusing user input.
 
-if ($contentType !== 'image/png' || $mimeType !== 'image/png') {
-    die("Only PNG images are allowed");
-}
-```
+These checks improve the lab implementation, but production systems should also store uploads outside the web root when possible, prevent executable files from running in upload directories, authorize downloads, scan content where appropriate, and set safe response headers such as `X-Content-Type-Options: nosniff`.
 
-### 3. Hide the Uploads Directory
+## Suggested Exercises
 
-Do not expose the upload folder directly to users. Serve files through a controlled download endpoint instead of allowing direct access.
+- Upload the same inert file to both ports and compare the JSON responses.
+- Rename an image with an unsafe extension and observe the different outcomes.
+- Change the filename and MIME type independently to see why layered validation matters.
+- Inspect `uploads/` after each test and compare original versus randomized names.
+- Add a download endpoint that serves files with authorization and safe content-disposition headers.
 
-Recommended practices:
+## Limitations
 
-- store uploads outside the web root when possible
-- use random names instead of raw user filenames
-- keep the original file name in a database only if needed
-- block direct directory listing and return `403` for the upload directory
-- use `Content-Disposition`, `Content-Type`, and `X-Content-Type-Options: nosniff`
+This is a deliberately small teaching project, not a complete production upload service. It does not provide authentication, malware scanning, persistent metadata, rate limiting, or a protected download endpoint. The vulnerable mode is intentionally unsafe by design.
 
-### 4. Limit Risk and Add Defenses
+## License
 
-Use multiple layers of defense:
-
-- limit file size
-- reject unexpected content types
-- scan for malware or suspicious strings
-- update dependencies and server libraries
-- place uploads on a separate container or server
-- configure the web server to prevent executable scripts from running from the upload directory
-- disable dangerous runtime functions when possible
-- hide server errors from users
-
-## Recommended Remediation Checklist
-
-- [ ] Use a strict allowlist of permitted extensions
-- [ ] Validate file content and MIME type
-- [ ] Check file size and memory limits
-- [ ] Rename uploaded files to random secure filenames
-- [ ] Store files outside the web root or in a restricted directory
-- [ ] Block direct access to the upload folder
-- [ ] Implement authorization checks before serving downloads
-- [ ] Scan for malware and monitor suspicious uploads
-- [ ] Keep server and frameworks patched
-
-## Why This Matters
-
-File upload vulnerabilities remain a common way for attackers to deploy web shells, scripts, or malicious payloads. The safest approach is not one check, but a layered defense: validate the filename, validate the content, sanitize the storage path, and restrict direct access.
+Use this lab for learning, testing, and secure-development demonstrations in environments you control.

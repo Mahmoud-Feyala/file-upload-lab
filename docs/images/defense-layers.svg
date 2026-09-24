@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc">
+  <title id="title">Layered file upload defenses</title>
+  <desc id="desc">Four defense layers protect an upload: size, extension and MIME, magic bytes, and random storage names.</desc>
+  <rect width="1000" height="420" rx="24" fill="#f8fafc"/>
+  <text x="60" y="62" fill="#0f172a" font-family="Arial, sans-serif" font-size="28" font-weight="700">Fixed model · Defense layers</text>
+  <text x="60" y="94" fill="#475569" font-family="Arial, sans-serif" font-size="17">Every check removes a different class of trust from the upload.</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="60" y="140" width="195" height="185" rx="14" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/><text x="157" y="185" text-anchor="middle" fill="#991b1b" font-size="20" font-weight="700">1 · Size</text><text x="157" y="220" text-anchor="middle" fill="#7f1d1d" font-size="15">Reject files above</text><text x="157" y="246" text-anchor="middle" fill="#7f1d1d" font-size="15">2 MB</text>
+    <rect x="280" y="140" width="195" height="185" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="377" y="185" text-anchor="middle" fill="#92400e" font-size="20" font-weight="700">2 · Type</text><text x="377" y="220" text-anchor="middle" fill="#78350f" font-size="15">Allow safe extensions</text><text x="377" y="246" text-anchor="middle" fill="#78350f" font-size="15">and MIME values</text>
+    <rect x="500" y="140" width="195" height="185" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><text x="597" y="185" text-anchor="middle" fill="#1e3a8a" font-size="20" font-weight="700">3 · Content</text><text x="597" y="220" text-anchor="middle" fill="#1e40af" font-size="15">Check magic bytes</text><text x="597" y="246" text-anchor="middle" fill="#1e40af" font-size="15">against the extension</text>
+    <rect x="720" y="140" width="220" height="185" rx="14" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/><text x="830" y="185" text-anchor="middle" fill="#166534" font-size="20" font-weight="700">4 · Storage</text><text x="830" y="220" text-anchor="middle" fill="#166534" font-size="15">Randomize the name</text><text x="830" y="246" text-anchor="middle" fill="#166534" font-size="15">before writing to disk</text>
+  </g>
+  <path d="M255 232 H280 M475 232 H500 M695 232 H720" stroke="#64748b" stroke-width="3"/>
+</svg>
