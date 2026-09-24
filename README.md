@@ -1,7 +1,7 @@
 # File Upload Security Lab
 
 <p align="center">
-  <img src="public/example.jpg" alt="File upload security lab thumbnail" width="600" />
+  <img src="public/example.jpg" alt="File upload security lab thumbnail" width="1200" />
 </p>
 
 ![File upload request flow](docs/images/upload-flow.svg)
