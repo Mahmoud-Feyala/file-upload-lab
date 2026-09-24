@@ -1,5 +1,9 @@
 # File Upload Security Lab
 
+<p align="center">
+  <img src="public/example.jpg" alt="File upload security lab thumbnail" width="240" />
+</p>
+
 ![File upload request flow](docs/images/upload-flow.svg)
 
 An intentionally vulnerable Node.js and Express lab for comparing unsafe file upload handling with a hardened implementation. Run the same browser workflow against both servers and observe how filename trust, content validation, and storage strategy change the result.
